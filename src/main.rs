@@ -1,40 +1,58 @@
-use std::collections::HashMap;
+extern crate rand;
 
-struct InvertedIndex {
-    index: HashMap<String, Vec<String>>,
-    documents: Vec<String>,
+use std::collections::{HashMap, HashSet};
+
+use rand::random;
+
+// Documents
+type DocId = u64;
+
+// Index
+struct InvertedIndex<'x> {
+    // Token --> [ DocId ]
+    index: HashMap<&'x str, Vec<DocId>>,
 }
 
-impl InvertedIndex {
-    fn new() -> InvertedIndex {
-        return InvertedIndex {
-            index: HashMap::new(),
-            documents: Vec::new(),
-        };
+impl<'x> InvertedIndex<'x> {
+    fn new() -> InvertedIndex<'x> {
+        return InvertedIndex { index: HashMap::new() };
     }
 
-    fn tokenize(&self, document: String) -> Vec<String> {
-        let tokens: Vec<String> = vec![document, "wut".to_owned()];
-        return tokens;
+    fn tokenize(&self, payload: &'x str) -> Vec<&'x str> {
+        return payload.split_whitespace().collect();
     }
 
-    fn index(&self, document: String) -> i32 {
-        // self.documents.push(document);
-        let tokens = self.tokenize(document);
+    fn index(&mut self, payload: &'x str) -> DocId {
+        let id: DocId = random();
+        let tokens = self.tokenize(payload);
         for token in tokens {
-            println!("{}", token);
+            self.index.entry(token).or_insert(vec![]).push(id);
         }
-        0
+        id
     }
 
-    fn search(&self, query: String) -> i32 {
-        0
+    fn search(&self, query: &str) -> HashSet<DocId> {
+        let mut docs: HashSet<DocId> = HashSet::new();
+        let tokens = self.tokenize(query);
+        for token in tokens {
+            match self.index.get(token) {
+                Some(ids) => {
+                    for id in ids {
+                        docs.insert(*id);
+                    }
+                }
+                None => {}
+            }
+        }
+        docs
     }
 }
 
 
 fn main() {
-    let idx = InvertedIndex::new();
-    idx.index("The quick brown fox jumps over the lazy dog".to_owned());
-    println!("{}", idx.search("Hello, World?".to_owned()));
+    let mut idx = InvertedIndex::new();
+    idx.index("The quick brown fox jumps over the lazy dog");
+    idx.index("the world is flat");
+    println!("{:?}", idx.search("the"));
+    println!("{:?}", idx.search("foo"));
 }
