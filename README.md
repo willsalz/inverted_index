@@ -1,2 +1,2 @@
 # inverted_index
-Plans with Inverted Indexes [ Indices? ] in Rust
+Playing with Inverted Indexes [ Indices? ] in Rust
