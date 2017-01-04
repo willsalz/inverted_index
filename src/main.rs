@@ -52,7 +52,7 @@ impl InvertedIndex {
 
     fn delete(&mut self, doc_id: DocId) -> () {
         // Remove DocId from each token's posting list
-        for (token, mut posting_list) in &mut self.index {
+        for (_, mut posting_list) in &mut self.index {
             posting_list.retain(|val| *val != doc_id)
         }
 
@@ -93,8 +93,6 @@ fn main() {
     idx.index("The world is flat".to_string());
 
     // Search for a term
-    println!("{:?}", idx);
-    println!();
     let query = "what the";
     let doc_ids = idx.search(query.to_string());
 
@@ -107,8 +105,6 @@ fn main() {
                  doc);
     }
     idx.delete(0);
-    println!("{:?}", idx);
-    println!();
 
     // Display found documents
     let doc_ids = idx.search(query.to_string());
